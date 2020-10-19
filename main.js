@@ -148,20 +148,10 @@ bot.on('message', msg => {
     }
 
     if (!msg.author.bot) {
-        if (db.get(msg.guild.id + '.defaultChannelID') == "") {
+        if (db.get(msg.guild.id + '.defaultChannelID') == "" || msg.channel.id == db.get(msg.guild.id + '.defaultChannelID')) {
             var put = db.get(msg.guild.id + '.numberOfMensages') + 1
-
-            ChangeNumberOfMensages(put)
+            db.set(msg.guild.id + '.numberOfMensages', put)
         }
-        else if (msg.channel.id == db.get(msg.guild.id + '.defaultChannelID')) {
-            var put = db.get(msg.guild.id + '.numberOfMensages') + 1
-
-            ChangeNumberOfMensages(put)
-        }
-        function ChangeNumberOfMensages(numberToChange) {
-            db.set(msg.guild.id + '.numberOfMensages', numberToChange)
-        }
-
     }
 })
 
