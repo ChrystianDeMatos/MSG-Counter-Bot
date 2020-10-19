@@ -6,7 +6,7 @@ var cron = require("cron");
 
 const bot = new Discord.Client();
 
-const token = 'NzY3MTE1NDkxNDUzMDQyNzI4.X4tN-Q.HGhIdVnTHdoSU6hJEvwgdbwSXRs'
+const token = process.env.token
 
 const prefix = config.prefix
 const defaultUTC = config.defaultUTC
