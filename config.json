@@ -1,4 +1,5 @@
 {
     "defaultUTC":"America/Los_Angeles",
-    "prefix":"%"
+    "prefix":"%",
+    "midNightTime":"00 00 00 * * *"
 }

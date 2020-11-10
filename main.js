@@ -1,26 +1,24 @@
 const Discord = require("discord.js")
 const config = require('./config.json')
-const db = require('quick.db');
-var cron = require("cron");
+require('dotenv').config()
+const con = require('./backend.js');
+
+var CronJobManager = require('cron-job-manager'),
+manager = new CronJobManager();
 
 
 const bot = new Discord.Client();
 
+// Config
 const token = process.env.token
 
 const prefix = config.prefix
 const defaultUTC = config.defaultUTC
+const midNightTime = config.midNightTime
 
 var defaultChannel
 
-bot.on("ready", () => {
-    console.log(`Bot has started, with 
-    ${bot.users.cache.size} users, in 
-    ${bot.channels.cache.size} channels of 
-    ${bot.guilds.cache.size} guilds.`);
-    bot.user.setActivity(`Serving 
-    ${bot.guilds.cache.size} servers`);
-});
+
 
 bot.on("guildCreate", guild => {
 
@@ -32,13 +30,26 @@ bot.on("guildCreate", guild => {
             }
         }
     })
-    //defaultChannel will be the channel object that the bot first finds permissions for
     defaultChannel.send('Ola, eu sou seu novo Bot, use `%help` para mais informações.')
 
 
 });
 
-bot.on('message', msg => {
+bot.on("ready", () => {
+    console.log(`Bot has started, with 
+    ${bot.users.cache.size} users, in 
+    ${bot.channels.cache.size} channels of 
+    ${bot.guilds.cache.size} guilds.`);
+    bot.user.setActivity(`Serving 
+    ${bot.guilds.cache.size} servers`);
+
+    setupSchedules();
+
+    const used = process.memoryUsage().heapUsed / 1024 / 1024;
+    console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
+});
+
+bot.on('message', async msg => {
     if (msg.content.startsWith(prefix)) {
 
         let command = msg.content
@@ -50,7 +61,7 @@ bot.on('message', msg => {
                 .setColor(msg.member.displayHexColor)
                 .setDescription('Aki a lista de comandos para o servidor.')
                 .addFields(
-                    { name: '`' + prefix + 'setchannel`', value: 'Esse comando come teu cu' },
+                    { name: '`' + prefix + 'setchannel`', value: 'Esse comando faz tatanana' },
                     { name: '\u200B', value: '\u200B' },
                     { name: 'Inline field title', value: 'Some value here', inline: true },
                     { name: 'Inline field title', value: 'Some value here', inline: true },
@@ -59,43 +70,58 @@ bot.on('message', msg => {
             msg.channel.send(embed);
         }
 
+        // if (command.startsWith('teste')) {
+        //     let testtttt = await con.get(msg.guild.id, 'number_of_mensages');
+        //     console.log(testtttt)
+        // }
+        // if (command.startsWith('teste1')) {
+        //     await con.set(msg.guild.id, 'number_of_mensages', 24);
+        // }
+        // if (command.startsWith('teste2')) {
+        //     msg.channel.send(msg.guild.region)
+        // }
 
+        if (command.startsWith('teste3')) {
+            console.log(manager.listCrons());
+        }
 
         if (command.startsWith('setchannel')) {
             defaultChannel = msg.channel.id
-            console.log(defaultChannel)
-            db.set(msg.guild.id + '.defaultChannelID', defaultChannel)
-            // xpFile[msg.guild.id] = { numberOfMensages: xpFile.numberOfMensages, defaultChannelID: xpFile[msg.guild.id].defaultChannelID }
-            // fs.writeFileSync(xpPath, JSON.stringify(xpFile, null, 2))
-            msg.channel.send('O novo canal default é: <#' + defaultChannel + '>');
+            con.set(msg.guild.id, 'default_channel_id', defaultChannel)
+            await msg.channel.send('O novo canal default é: <#' + defaultChannel + '>');
         }
 
         if (command.startsWith('setdefault')) {
-            defaultChannel = msg.channel.id
-            console.log(defaultChannel)
-            db.set(msg.guild.id + '.defaultChannelID', "")
+            con.setNull(msg.guild.id, 'default_channel_id')
             msg.channel.send('Todos canais agora estão sendo observados.');
         }
 
         if (command.startsWith('setup')) {
-            if (db.get(msg.guild.id) === null) {
-
-                db.set(msg.guild.id + '.numberOfMensages', 0)
-                db.set(msg.guild.id + '.defaultChannelID', "")
-
-                if (command.length > 5) {
-                    let region = command
-                    region = region.substring(6)
-                    setupScheduledMessage(msg, region)
-                    msg.channel.send('Server setupado com sucesso.');
-                } else {
-                    setupScheduledMessage(msg)
-                    msg.channel.send(
-                        'Server setupado com sucesso, o horario esta definido para o fuso ' + defaultUTC + '.\
-                        \nCaso queira mudar a região use `' + prefix + 'changetimezone <região>` \
-                        \nRegiões: https://momentjs.com/timezone/');
+            const verifyServer = await con.verify(msg.guild.id)
+            //console.log(verifyServer)
+            if(!verifyServer){
+                try{
+                    //con.get(msg.guild.id, 'server_id')
+                    await con.setup(msg.guild.id)
+                    await con.set(msg.guild.id, 'number_of_mensages', 0)
+                    //con.set(msg.guild.id, 'default_channel_id', msg.channel.id)
+    
+                    if (command.length > 5) {
+                        let region = command
+                        region = region.substring(6)
+                        await setupScheduledMessage(msg, region)
+                        msg.channel.send('Server setupado com sucesso, e o horario esta definido para o fuso ' + region + '.')
+                    } else {
+                        await setupScheduledMessage(msg)
+                        msg.channel.send(
+                            'Server setupado com sucesso, o horario esta definido para o fuso ' + defaultUTC + '.\
+                            \nCaso queira mudar a região use `' + prefix + 'changetimezone <região>` \
+                            \nRegiões: https://momentjs.com/timezone/');
+                    }
+                }catch(e){
+                    console.log(e)
                 }
-            } else {
+            }else{
                 msg.channel.send('O servidor ja esta setupado')
                 return
             }
@@ -104,18 +130,20 @@ bot.on('message', msg => {
         if (command.startsWith('changetimezone')) {
             let zoneToChange = command
             zoneToChange = zoneToChange.substring(15)
-            console.log(zoneToChange)
-            changeBotTimeZone(msg, zoneToChange)
+            //console.log(zoneToChange)
+            changeServerTimeZone(msg, zoneToChange)
 
         }
         if (command.startsWith('currenttimezone')) {
-            msg.channel.send(`O fuso horário atual está em ${db.get(msg.guild.id + '.scheduledRegion')}`)
+            const region = await con.get(msg.guild.id, 'scheduled_region')
+            msg.channel.send(`O fuso horário atual está em ${region}`)
         }
 
         if (command.startsWith('count')) {
-            // Send the user's avatar URL
-            let messageNumber = db.get(msg.guild.id + '.numberOfMensages');
+            let messageNumber = await con.get(msg.guild.id, 'number_of_mensages')
 
+            console.log(messageNumber)
+            
             // colocar undefined qualquer coisa || messageNumber == undefined
             if(!messageNumber || messageNumber == 0){
                 msg.channel.send('O servidor precisa estar setupado ou ainda não foram enviadas mensagens.')
@@ -132,76 +160,76 @@ bot.on('message', msg => {
         }
 
         if (command.startsWith('record')) {
-
             sendEmbedServerRecords(msg)
-
-        }
-
-        if (command.startsWith('test1')) {
-            
-        }
-        if (command.startsWith('test2')) {
-            registerDayRecord(msg)
         }
 
         return
     }
 
     if (!msg.author.bot) {
-        if (db.get(msg.guild.id + '.defaultChannelID') == "" || msg.channel.id == db.get(msg.guild.id + '.defaultChannelID')) {
-            var put = db.get(msg.guild.id + '.numberOfMensages') + 1
-            db.set(msg.guild.id + '.numberOfMensages', put)
+        let channelId = await con.get(msg.guild.id, "default_channel_id")
+        if (channelId == null || msg.channel.id == channelId) {
+            con.addMensageCount(msg.guild.id)
         }
     }
 })
 
-function setupScheduledMessage(msg, region = undefined) {
+async function setupScheduledMessage(msg, region = defaultUTC) {
     try {
-        let scheduledMessage = new cron.CronJob('00 00 00 * * *', function() {registerDayRecord(msg)}, null, true, region);
-        console.log('vai toma no cu')
-        db.set(msg.guild.id + '.scheduledRegion', region)
-        scheduledMessage.start()
+        manager.add(msg.guild.id, midNightTime, () => { testRegisterServersDayRecords(msg.guild.id) }, {
+            start: true,
+            timeZone: region,
+            onComplete: () => {}
+        })
+        await con.set(msg.guild.id, "scheduled_region", region)
     }
     catch (e) {
-        console.error(e);
-        let scheduledMessage = new cron.CronJob('00 00 00 * * *', function() {registerDayRecord(msg)}, null, true, defaultUTC);
-        console.log('vai toma no cu2')
-        db.set(msg.guild.id + '.scheduledRegion', defaultUTC)
-        scheduledMessage.start()
+        if(manager.exists(msg.guild.id)){
+            manager.deleteJob(msg.guild.id)
+            manager.add(msg.guild.id, midNightTime, () => { testRegisterServersDayRecords(msg.guild.id) }, {
+                start: true,
+                timeZone: regionToChange,
+                onComplete: () => {}
+            })
+            await con.set(msg.guild.id, "scheduled_region", regionToChange)
+            msg.channel.send('Região invalida, utilize o comando `%help`')
+        }
     }
 }
 
-function changeBotTimeZone(msg, regionToChange) {
-    try { scheduledMessage.stop() }
-    catch {}
+async function changeServerTimeZone(msg, regionToChange) {
 
-    try {
-        let scheduledMessage = new cron.CronJob('00 00 00 * * *', function() {registerDayRecord(msg)}, null, false, regionToChange);
-        db.set(msg.guild.id + '.scheduledRegion', regionToChange)
-        scheduledMessage.start()
-        msg.channel.send('Região escolhida com sucesso.')
+    if(regionToChange == null){
+        regionToChange = defaultUTC
     }
-    catch (e) {
-        let scheduledMessage = new cron.CronJob('00 00 00 * * *', function() {registerDayRecord(msg)}, null, false, defaultUTC);
-        db.set(msg.guild.id + '.scheduledRegion', defaultUTC)
-        scheduledMessage.start()
-        msg.channel.send('Região inexistente.')
+
+    try{
+        if(manager.exists(msg.guild.id)){
+            manager.deleteJob(msg.guild.id)
+            scheduleServer(msg.guild.id, regionToChange)
+    
+            await con.set(msg.guild.id, "scheduled_region", regionToChange)
+            msg.channel.send('Região definida para '+regionToChange+' com sucesso.')
+        }else{
+            scheduleServer(msg.guild.id, regionToChange)
+    
+            await con.set(msg.guild.id, "scheduled_region", regionToChange)
+            msg.channel.send('Região definida para '+regionToChange+' com sucesso.')
+        }
+    }catch(e){
+        msg.channel.send('Região invalida, utilize o comando `%help`')
     }
+    
 }
 
-function registerDayRecord(msg) {
-    db.push(msg.guild.id + '.daysMensageRecord', db.get(msg.guild.id + '.numberOfMensages'))
-    db.set(msg.guild.id + '.numberOfMensages', 0)
-    sendEmbedServerRecords(msg)
-}
-
-function sendEmbedServerRecords(msg) {
-    let daysMensageRecordArray = db.get(msg.guild.id + '.daysMensageRecord')
+async function sendEmbedServerRecords(channel, guild) {
+    let daysMensageRecordArray = await con.get(guild.id, 'days_mensage_record')
+    
 
     console.log(daysMensageRecordArray)
 
     if (!daysMensageRecordArray || daysMensageRecordArray == undefined) {
-        msg.channel.send('Ainda não há recordes.')
+        channel.send('Ainda não há recordes.')
         return
     }
 
@@ -216,13 +244,54 @@ function sendEmbedServerRecords(msg) {
 
     const embed = new Discord.MessageEmbed()
         .setTitle(`O recorde de mensagens diarias do servidor: **${daysMensageRecordArray[0]}**`)
-        .setColor(msg.member.displayHexColor)
+        .setColor('#04bfbf')
         .setDescription(`Seguindo:
                             2-${daysMensageRecordArray[1]}
                             3-${daysMensageRecordArray[2]}`)
         .setThumbnail(msg.guild.iconURL())
 
-    msg.channel.send(embed);
+    channel.send(embed);
 }
+
+async function setupSchedules(){
+    const servers = await con.getServers()
+    //console.log(servers);
+
+    for(const server of servers){
+        if(server.scheduled_region != null){
+            scheduleServer(server.server_id, server.scheduled_region)
+
+            //const cronJob = new cron.CronJob(midNightTime, function() {testRegisterServersDayRecords(server.server_id)}, null, true, server.scheduled_region);
+            //cronJob.start();
+            //await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+    }
+}  
+
+async function testRegisterServersDayRecords(serverId){
+    let defaultChannel = "";
+    let guild = bot.guilds.cache.get(serverId)
+    guild.channels.cache.forEach((channel) => {
+        if(channel.type == "text" && defaultChannel == "") {
+            if(channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
+                defaultChannel = channel;
+            }
+        }
+    })
+    let numberOfMesages = await con.get(serverId, 'number_of_mensages')
+    con.push(guild.id, 'days_mensage_record', numberOfMesages)
+    con.set(guild.id, 'number_of_mensages', 0)
+    defaultChannel.send("Foi salvo o numero de mensagens de hoje que foram: " + numberOfMesages)
+    sendEmbedServerRecords(defaultChannel, guild)
+}
+
+function scheduleServer(guildId, timeZone){
+    manager.add(guildId, midNightTime, () => { testRegisterServersDayRecords(guildId) }, {
+        start: true,
+        timeZone: timeZone,
+        onComplete: () => {}
+    })
+}
+
 
 bot.login(token)

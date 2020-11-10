@@ -1,6 +1,6 @@
 {
   "name": "botcab",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "cron": "^1.8.2",
+    "cron-job-manager": "^2.1.4",
     "discord.js": "^12.3.1",
-    "quick.db": "^7.1.3"
+    "dotenv": "^8.2.0",
+    "pg": "^8.4.1"
   }
 }
