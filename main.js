@@ -237,7 +237,7 @@ async function sendEmbedServerRecords(channel, guild) {
         return b - a
     })
 
-    for(i = 0; i < 2; i++){
+    for(i = 0; i < 3; i++){
         if(daysMensageRecordArray[i] == undefined) daysMensageRecordArray[i] = 0;
     }
 
