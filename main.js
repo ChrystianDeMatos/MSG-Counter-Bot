@@ -248,7 +248,7 @@ async function sendEmbedServerRecords(channel, guild) {
         .setDescription(`Seguindo:
                             2-${daysMensageRecordArray[1]}
                             3-${daysMensageRecordArray[2]}`)
-        .setThumbnail(msg.guild.iconURL())
+        .setThumbnail(guild.iconURL())
 
     channel.send(embed);
 }
