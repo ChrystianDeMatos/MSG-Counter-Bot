@@ -160,7 +160,7 @@ bot.on('message', async msg => {
         }
 
         if (command.startsWith('record')) {
-            sendEmbedServerRecords(msg)
+            sendEmbedServerRecords(msg.channel, msg.guild)
         }
 
         return
