@@ -2,6 +2,7 @@ const Discord = require("discord.js")
 const config = require('./config.json')
 require('dotenv').config()
 const con = require('./backend.js');
+const moment = require("moment-timezone");
 
 var CronJobManager = require('cron-job-manager'),
 manager = new CronJobManager();
@@ -41,7 +42,7 @@ bot.on("ready", () => {
     ${bot.channels.cache.size} channels of 
     ${bot.guilds.cache.size} guilds.`);
     bot.user.setActivity(`Serving 
-    ${bot.guilds.cache.size} servers`);
+    ${bot.guilds.cache.size} servers :robot:`);
 
     setupSchedules();
 
@@ -98,7 +99,6 @@ bot.on('message', async msg => {
 
         if (command.startsWith('setup')) {
             const verifyServer = await con.verify(msg.guild.id)
-            //console.log(verifyServer)
             if(!verifyServer){
                 try{
                     //con.get(msg.guild.id, 'server_id')
@@ -176,20 +176,20 @@ bot.on('message', async msg => {
 
 async function setupScheduledMessage(msg, region = defaultUTC) {
     try {
-        manager.add(msg.guild.id, midNightTime, () => { testRegisterServersDayRecords(msg.guild.id) }, {
+        manager.add(msg.guild.id, midNightTime, () => { registerServersDayRecords(msg.guild.id) }, {
             start: true,
-            timeZone: region,
-            onComplete: () => {}
+            timeZone: region
+            //onComplete: () => {}
         })
         await con.set(msg.guild.id, "scheduled_region", region)
     }
     catch (e) {
         if(manager.exists(msg.guild.id)){
             manager.deleteJob(msg.guild.id)
-            manager.add(msg.guild.id, midNightTime, () => { testRegisterServersDayRecords(msg.guild.id) }, {
+            manager.add(msg.guild.id, midNightTime, () => { registerServersDayRecords(msg.guild.id) }, {
                 start: true,
-                timeZone: regionToChange,
-                onComplete: () => {}
+                timeZone: regionToChange
+                //onComplete: () => {}
             })
             await con.set(msg.guild.id, "scheduled_region", regionToChange)
             msg.channel.send('Região invalida, utilize o comando `%help`')
@@ -203,21 +203,22 @@ async function changeServerTimeZone(msg, regionToChange) {
         regionToChange = defaultUTC
     }
 
-    try{
-        if(manager.exists(msg.guild.id)){
-            manager.deleteJob(msg.guild.id)
-            scheduleServer(msg.guild.id, regionToChange)
-    
-            await con.set(msg.guild.id, "scheduled_region", regionToChange)
-            msg.channel.send('Região definida para '+regionToChange+' com sucesso.')
-        }else{
-            scheduleServer(msg.guild.id, regionToChange)
-    
-            await con.set(msg.guild.id, "scheduled_region", regionToChange)
-            msg.channel.send('Região definida para '+regionToChange+' com sucesso.')
-        }
-    }catch(e){
+    if(moment.tz.zone(regionToChange) != null){
         msg.channel.send('Região invalida, utilize o comando `%help`')
+        return;
+    }
+
+    if(manager.exists(msg.guild.id)){
+        manager.deleteJob(msg.guild.id)
+        scheduleServer(msg.guild.id, regionToChange)
+
+        await con.set(msg.guild.id, "scheduled_region", regionToChange)
+        msg.channel.send('Região definida para '+regionToChange+' com sucesso.')
+    }else{
+        scheduleServer(msg.guild.id, regionToChange)
+
+        await con.set(msg.guild.id, "scheduled_region", regionToChange)
+        msg.channel.send('Região definida para '+regionToChange+' com sucesso.')
     }
     
 }
@@ -232,21 +233,24 @@ async function sendEmbedServerRecords(channel, guild) {
         return
     }
 
-    //organiza a array do maior pro menor
-    daysMensageRecordArray.sort((a, b) => {
-        return b - a
-    })
+    // organiza a array do maior pro menor
+    // ja vem organizado apartir da database
 
-    for(i = 0; i < 3; i++){
+    // daysMensageRecordArray.sort((a, b) => {
+    //     return b - a
+    // })
+
+    for(i = 0; i < 5; i++){
         if(daysMensageRecordArray[i] == undefined) daysMensageRecordArray[i] = 0;
     }
 
     const embed = new Discord.MessageEmbed()
-        .setTitle(`O recorde de mensagens diarias do servidor: **${daysMensageRecordArray[0]}**`)
+        .setTitle(`O recorde de mensagens diarias do servidor:\n:trophy:: **${daysMensageRecordArray[0]}** :first_place: `)
         .setColor('#04bfbf')
-        .setDescription(`Seguindo:
-                            2-${daysMensageRecordArray[1]}
-                            3-${daysMensageRecordArray[2]}`)
+        .setDescription(`:two:: ${daysMensageRecordArray[1]} :second_place:\n` +
+        `:three:: ${daysMensageRecordArray[2]} :third_place:\n` +
+        `:four:: ${daysMensageRecordArray[3]}\n` +
+        `:five:: ${daysMensageRecordArray[4]}\n`)
         .setThumbnail(guild.iconURL())
 
     channel.send(embed);
@@ -254,8 +258,6 @@ async function sendEmbedServerRecords(channel, guild) {
 
 async function setupSchedules(){
     const servers = await con.getServers()
-    //console.log(servers);
-
     for(const server of servers){
         if(server.scheduled_region != null){
             scheduleServer(server.server_id, server.scheduled_region)
@@ -267,7 +269,7 @@ async function setupSchedules(){
     }
 }  
 
-async function testRegisterServersDayRecords(serverId){
+async function registerServersDayRecords(serverId){
     let defaultChannel = "";
     let guild = bot.guilds.cache.get(serverId)
     guild.channels.cache.forEach((channel) => {
@@ -278,17 +280,17 @@ async function testRegisterServersDayRecords(serverId){
         }
     })
     let numberOfMesages = await con.get(serverId, 'number_of_mensages')
-    con.push(guild.id, 'days_mensage_record', numberOfMesages)
+    await con.push(guild.id, 'days_mensage_record', numberOfMesages)
     con.set(guild.id, 'number_of_mensages', 0)
     defaultChannel.send("Foi salvo o numero de mensagens de hoje que foram: " + numberOfMesages)
     sendEmbedServerRecords(defaultChannel, guild)
 }
 
 function scheduleServer(guildId, timeZone){
-    manager.add(guildId, midNightTime, () => { testRegisterServersDayRecords(guildId) }, {
+    manager.add(guildId, midNightTime, () => { registerServersDayRecords(guildId) }, {
         start: true,
-        timeZone: timeZone,
-        onComplete: () => {}
+        timeZone: timeZone
+        //onComplete: () => {}
     })
 }
 

@@ -60,6 +60,18 @@ module.exports = {
             console.log(e)
         }
     },
+    getRecords: async (guildId) => {
+        try{
+            let query = `SELECT unnest(days_mensage_record) nr
+            FROM servers
+            WHERE server_id=${guildId}
+            ORDER BY nr desc
+            LIMIT 5`
+            return (await pool.query(query)).rows
+        }catch(e){
+            console.log(e)
+        }
+    },
     push: async (guildId, column, info) => {
         try{
             await pool.query(`UPDATE servers SET ${column} = array_append(${column}, ${info}) WHERE server_id=${guildId}`)
