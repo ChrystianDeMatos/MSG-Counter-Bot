@@ -234,11 +234,10 @@ async function sendEmbedServerRecords(channel, guild) {
     }
 
     // organiza a array do maior pro menor
-    // ja vem organizado apartir da database
 
-    // daysMensageRecordArray.sort((a, b) => {
-    //     return b - a
-    // })
+    daysMensageRecordArray.sort((a, b) => {
+        return b - a
+    })
 
     for(i = 0; i < 5; i++){
         if(daysMensageRecordArray[i] == undefined) daysMensageRecordArray[i] = 0;
