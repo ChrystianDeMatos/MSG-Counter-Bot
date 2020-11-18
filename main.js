@@ -244,12 +244,12 @@ async function sendEmbedServerRecords(channel, guild) {
     }
 
     const embed = new Discord.MessageEmbed()
-        .setTitle(`O recorde de mensagens diarias do servidor:\n:trophy:: **${daysMensageRecordArray[0]}** :first_place: `)
+        .setTitle(`O recorde de mensagens diarias do servidor:\n:trophy:: **${daysMensageRecordArray[0].nr}** :first_place: `)
         .setColor('#04bfbf')
-        .setDescription(`:two:: ${daysMensageRecordArray[1]} :second_place:\n` +
-        `:three:: ${daysMensageRecordArray[2]} :third_place:\n` +
-        `:four:: ${daysMensageRecordArray[3]}\n` +
-        `:five:: ${daysMensageRecordArray[4]}\n`)
+        .setDescription(`:two:: ${daysMensageRecordArray[1].nr} :second_place:\n` +
+        `:three:: ${daysMensageRecordArray[2].nr} :third_place:\n` +
+        `:four:: ${daysMensageRecordArray[3].nr}\n` +
+        `:five:: ${daysMensageRecordArray[4].nr}\n`)
         .setThumbnail(guild.iconURL())
 
     channel.send(embed);
