@@ -224,7 +224,7 @@ async function changeServerTimeZone(msg, regionToChange) {
 }
 
 async function sendEmbedServerRecords(channel, guild) {
-    let daysMensageRecordArray = await con.get(guild.id, 'days_mensage_record')
+    let daysMensageRecordArray = await con.getRecords(guild.id, 'days_mensage_record')
     
     console.log(daysMensageRecordArray)
 
@@ -234,10 +234,10 @@ async function sendEmbedServerRecords(channel, guild) {
     }
 
     // organiza a array do maior pro menor
-
-    daysMensageRecordArray.sort((a, b) => {
-        return b - a
-    })
+    // ja vem organizada
+    // daysMensageRecordArray.sort((a, b) => {
+    //     return b - a
+    // })
 
     for(i = 0; i < 5; i++){
         if(daysMensageRecordArray[i] == undefined) daysMensageRecordArray[i] = 0;
