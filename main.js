@@ -224,7 +224,7 @@ async function changeServerTimeZone(msg, regionToChange) {
 }
 
 async function sendEmbedServerRecords(channel, guild) {
-    let daysMensageRecordArray = await con.getRecords(guild.id, 'days_mensage_record')
+    let daysMensageRecordArray = await con.getRecords(guild.id)
     
     console.log(daysMensageRecordArray)
 
