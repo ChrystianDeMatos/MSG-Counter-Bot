@@ -203,7 +203,7 @@ async function changeServerTimeZone(msg, regionToChange) {
         regionToChange = defaultUTC
     }
 
-    if(moment.tz.zone(regionToChange) != null){
+    if(moment.tz.zone(regionToChange) == null){
         msg.channel.send('Região invalida, utilize o comando `%help`')
         return;
     }
