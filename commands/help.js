@@ -1,19 +1,38 @@
+const Discord = require("discord.js")
+const config = require('../config.json')
+const prefix = config.prefix
+const { bot } = require('../main.js')
 
 module.exports = {
     name: 'help',
-    description: 'Help you with commands',
+    description: ':robot: Mostra os comandos.',
     execute(msg, args){
-        const embed = new Discord.MessageEmbed()
-            .setTitle(`Help`)
-            .setColor(msg.member.displayHexColor)
-            .setDescription('Aki a lista de comandos para o servidor.')
-            .addFields(
-                { name: '`' + prefix + 'setchannel`', value: 'Esse comando faz tatanana' },
-                { name: '\u200B', value: '\u200B' },
-                { name: 'Inline field title', value: 'Some value here', inline: true },
-                { name: 'Inline field title', value: 'Some value here', inline: true },
-            )
+        //console.log(bot.commands);
+        if(args.length == 0){
+            const embed = new Discord.MessageEmbed()
+                .setTitle(`Help`)
+                .setColor(msg.member.displayHexColor)
+                .setDescription('Aki a lista de comandos para o servidor.')
+            //     { name: '\u200B', value: '\u200B' },
 
-        msg.channel.send(embed);
+            bot.commands.forEach(element => {
+                embed.addField('`' + prefix + element.name + '`', element.description, true);
+            });
+        
+            msg.channel.send(embed);
+        }else if(args.length >= 1){
+            console.log(args)
+            const embed = new Discord.MessageEmbed()
+                .setTitle(`Help`)
+                .setColor(msg.member.displayHexColor)
+                //.setDescription('Aki a lista de comandos para o servidor.')
+
+            args.forEach(element => {
+                embed.addField('`' + prefix + bot.commands.get(element).name + '`', bot.commands.get(element).description, true);
+            })
+
+            msg.channel.send(embed);
+        }
+        
     },
 }

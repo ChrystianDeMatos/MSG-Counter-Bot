@@ -38,10 +38,10 @@ module.exports = {
             let objectQuery = (await pool.query(`SELECT ${column} FROM servers WHERE server_id = ${guildId}`)).rows
             switch(objectQuery.length){
                 case 0:
-                    console.log('1 ')
+                    //console.log('1 ')
                     return null
                 case 1:
-                    console.log('2 ' + objectQuery[0][column])
+                    //console.log('2 ' + objectQuery[0][column])
                     return objectQuery[0][column]
                 default:
                     let arrayReturn = []
@@ -94,7 +94,7 @@ module.exports = {
             console.log(e)
         }
     },
-    addMensageCount: (guildId) => {
+    addMensageCount: async (guildId) => {
         try{
             pool.query(`UPDATE servers SET number_of_mensages = number_of_mensages+1 WHERE server_id=${guildId}`)
         }catch(e){
