@@ -11,7 +11,9 @@ const utils = require('./utils.js')
 
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
-exports.bot = bot;
+module.exports = { bot: (serverId) => { // provisirio
+    return bot.guilds.cache.get(serverId)
+}}
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
@@ -49,6 +51,8 @@ bot.on("ready", () => {
 
     utils.setupSchedules();
 
+    console.log(bot.guilds.cache)
+
     const used = process.memoryUsage().heapUsed / 1024 / 1024;
     console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
 });
@@ -59,7 +63,6 @@ bot.on('message', async msg => {
     if (msg.channel.type === 'dm') {
         return msg.reply('Não executo comandos em DM!')
     }
-    
 
     if (msg.content.startsWith(prefix)) {
 

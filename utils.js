@@ -2,7 +2,6 @@ const con = require('./backend.js');
 const config = require('./config.json')
 const Discord = require("discord.js")
 const moment = require("moment-timezone");
-const { bot } = require('./main.js')
 
 var CronJobManager = require('cron-job-manager'),
 manager = new CronJobManager();
@@ -110,13 +109,15 @@ async function setupSchedules() {
 
 module.exports.registerServersDayRecords = registerServersDayRecords;
 async function registerServersDayRecords(serverId) {
-    let defaultChannel = ""
+    let defaultChannel = ''
     let channelSetted = await con.get(serverId, 'default_channel_id')
+    let guild;
 
     if (channelSetted == null){
-        let guild = bot.guilds.cache.get(serverId)
+        //fix provisorio
+        guild = require('./main.js').bot(serverId)
         guild.channels.cache.forEach((channel) => {
-            if (channel.type == "text" && defaultChannel == "") {
+            if (channel.type == "text" && defaultChannel == '') {
                 if (channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                     defaultChannel = channel
                 }
