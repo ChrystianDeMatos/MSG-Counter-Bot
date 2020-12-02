@@ -28,7 +28,12 @@ module.exports = {
                 //.setDescription('Aki a lista de comandos para o servidor.')
 
             args.forEach(element => {
-                embed.addField('`' + prefix + bot.commands.get(element).name + '`', bot.commands.get(element).description, true);
+                if(bot.commands.get(element).additionalHelp != undefined){
+                    embed.addField('`' + prefix + bot.commands.get(element).name + '`', bot.commands.get(element).description + '\n' + bot.commands.get(element).additionalHelp, true);
+                }else{
+                    embed.addField('`' + prefix + bot.commands.get(element).name + '`', bot.commands.get(element).description, true);
+                }
+                
             })
 
             msg.channel.send(embed);

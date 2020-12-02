@@ -6,8 +6,12 @@ const moment = require("moment-timezone");
 var CronJobManager = require('cron-job-manager'),
 manager = new CronJobManager();
 
+const prefix = config.prefix
 const defaultUTC = config.defaultUTC
 const midNightTime = config.midNightTime
+module.exports.config = {prefix, defaultUTC, midNightTime}
+
+
 
 module.exports.setupScheduledMessage = setupScheduledMessage;
 async function setupScheduledMessage(msg, region = defaultUTC) {
@@ -37,11 +41,13 @@ module.exports.changeServerTimeZone = changeServerTimeZone;
 async function changeServerTimeZone(msg, regionToChange) {
 
     if (regionToChange == null) {
-        regionToChange = defaultUTC
+        msg.channel.send('Região indefinida, utilize o comando `' + prefix + 'help changetimezone`')
+        return
+        //regionToChange = defaultUTC
     }
 
     if (moment.tz.zone(regionToChange) == null) {
-        msg.channel.send('Região invalida, utilize o comando `%help`')
+        msg.channel.send('Região inválida, utilize o comando `' + prefix + 'help changetimezone`')
         return
     }
 

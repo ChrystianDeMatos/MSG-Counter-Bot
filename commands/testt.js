@@ -5,6 +5,7 @@ const { bot } = require('../main.js')
 module.exports = {
     name: 'testt',
     description: 'Comando de teste.',
+    additionalHelp: '\nMe executa :D',
     async execute(msg) {
         msg.reply('não faço nada :stuck_out_tongue_closed_eyes:')
         //console.log(bot.users.cache.size)
