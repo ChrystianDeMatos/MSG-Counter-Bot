@@ -115,7 +115,7 @@ async function registerServersDayRecords(serverId) {
 
     if (channelSetted == null){
         //fix provisorio
-        guild = require('./main.js').bot(serverId)
+        guild = require('./main.js').botGuild(serverId)
         guild.channels.cache.forEach((channel) => {
             if (channel.type == "text" && defaultChannel == '') {
                 if (channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {

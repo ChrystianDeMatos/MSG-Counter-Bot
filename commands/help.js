@@ -7,7 +7,7 @@ module.exports = {
     name: 'help',
     description: ':robot: Mostra os comandos.',
     execute(msg, args){
-        //console.log(bot.commands);
+        console.log(bot.commands);
         if(args.length == 0){
             const embed = new Discord.MessageEmbed()
                 .setTitle(`Help`)

@@ -6,7 +6,6 @@ module.exports = {
     name: 'testt',
     description: 'Comando de teste.',
     async execute(msg) {
-
         msg.reply('não faço nada :stuck_out_tongue_closed_eyes:')
         //console.log(bot.users.cache.size)
         //utils.registerServersDayRecords(msg.guild.id)

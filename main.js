@@ -11,9 +11,12 @@ const utils = require('./utils.js')
 
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
-module.exports = { bot: (serverId) => { // provisirio
-    return bot.guilds.cache.get(serverId)
-}}
+module.exports = { 
+    bot,
+    botGuild: (serverId) => { // provisirio
+        return bot.guilds.cache.get(serverId)
+    }
+}
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
