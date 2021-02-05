@@ -4,6 +4,7 @@ const config = require('./config.json')
 require('dotenv').config()
 const con = require('./backend.js');
 const utils = require('./utils.js');
+const api = require('./api.js')
 //const { timeStamp } = require('console');
 
 // var CronJobManager = require('cron-job-manager'),
@@ -55,7 +56,7 @@ bot.on("ready", () => {
 
     utils.setupSchedules();
 
-    console.log(bot.guilds.cache)
+    //console.log(bot.guilds.cache)
 
     const used = process.memoryUsage().heapUsed / 1024 / 1024;
     console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
