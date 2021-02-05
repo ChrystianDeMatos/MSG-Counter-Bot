@@ -1,2 +1,2 @@
 Worker: node main.js
-gunicorn -b :5000 --access-logfile - --error-logfile - build:app
+gunicorn -b :3000 --access-logfile - --error-logfile - build:app
