@@ -3,7 +3,8 @@ const Discord = require("discord.js")
 const config = require('./config.json')
 require('dotenv').config()
 const con = require('./backend.js');
-const utils = require('./utils.js')
+const utils = require('./utils.js');
+//const { timeStamp } = require('console');
 
 // var CronJobManager = require('cron-job-manager'),
 // manager = new CronJobManager();
