@@ -3,7 +3,7 @@ const app = express();
 const backend = require('./backend.js');
 
 app.get('/', async (req, res) => {
-    console.log('funcionei');
+    console.log('funcioneii');
     let resp = await backend.getServers();
     res.send(resp);
 })
