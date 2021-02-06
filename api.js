@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+var cors = require('cors')
 const backend = require('./backend.js');
 
 
@@ -8,6 +9,8 @@ const backend = require('./backend.js');
 //     let resp = await backend.getServers();
 //     res.send(resp);
 // })
+
+app.use(cors())
 
 app.get('/api/servers/:teste', (async (req, res, next) => {
     try{
