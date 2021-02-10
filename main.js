@@ -80,7 +80,7 @@ bot.on('message', async msg => {
 
         command.execute(msg, args)
         //console.log(command)
-
+        
         return
     }
     

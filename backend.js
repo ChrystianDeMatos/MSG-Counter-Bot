@@ -62,12 +62,13 @@ module.exports = {
     },
     getRecords: async (guildId) => {
         try{
-            let query = `SELECT unnest(days_mensage_record) nr
+            let query = `SELECT array(SELECT unnest(days_mensage_record) nr
             FROM servers
             WHERE server_id=${guildId}
             ORDER BY nr desc
-            LIMIT 5`
-            return (await pool.query(query)).rows
+            LIMIT 5)`
+            const res = (await pool.query(query)).rows
+            return res[0].array
         }catch(e){
             console.log(e)
         }

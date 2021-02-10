@@ -1,13 +1,22 @@
 const con = require('../backend.js');
 const utils = require('../utils.js')
 const { bot } = require('../main.js')
+const api = require('../api')
+const imagesCreator = require('../imagesCreator.js')
+
+const Discord = require("discord.js")
 
 module.exports = {
     name: 'testt',
     description: 'Comando de teste.',
     additionalHelp: '\nMe executa :D',
     async execute(msg) {
-        msg.reply('não faço nada :stuck_out_tongue_closed_eyes:')
+        const testeeeee = await imagesCreator.testt(msg.guild.id);
+        //console.log(testeeeee)
+        const sfbuff = new Buffer.from(testeeeee.split(",")[1], "base64");
+        const sfattach = new Discord.MessageAttachment(sfbuff, "output.png");
+        msg.channel.send(sfattach)
+        //msg.reply('não faço nada :stuck_out_tongue_closed_eyes:')
         //console.log(bot.users.cache.size)
         //utils.registerServersDayRecords(msg.guild.id)
 
