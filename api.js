@@ -4,15 +4,7 @@ var cors = require('cors')
 const backend = require('./backend.js');
 const imagesCreator = require('./imagesCreator.js')
 
-
-
-
-
-// app.get('/api/servers', async (req, res) => {
-//     console.log('funcioneiii');
-//     let resp = await backend.getServers();
-//     res.send(resp);
-// })
+const { botGuild } = require('./main.js')
 
 app.use(cors())
 
@@ -24,28 +16,35 @@ app.get('/', (async (req, res, next) => {
     }
 }))
 
-app.get('/api/servers/:teste', (async (req, res, next) => {
+app.get('/api/servers/:serverId', (async (req, res, next) => {
     try {
-        console.log('funcioneii');
-        console.log(req.params.teste)
-        let resp = await backend.getRecords(req.params.teste);
+        let resp = await backend.getRecords(req.params.serverId, false);
         res.send(resp);
     } catch (e) {
         next(e)
     }
 }))
 
-app.get('/api/servers/img/:teste', (async (req, res, next) => {
+app.get('/api/servers/img/:serverId', (async (req, res, next) => {
     try {
-        //console.log(req.params.teste)
-        //let resp = await backend.getRecords(req.params.teste);
-        res.send(await imagesCreator.testt(req.params.teste));
-        //res.send(image);
+        res.send(await imagesCreator.create(req.params.serverId));
     } catch (e) {
         next(e)
     }
 }))
 
+app.get('/api/serversList/', (async (req, res, next) => {
+    try {
+        let resp = await backend.getServers();
+        resp.map((server, index) => { resp[index].img_url = botGuild(server.server_id).iconURL() })
+        //bot.botGuild(resp.)
 
+        console.log(resp)
+
+        res.send(resp);
+    } catch (e) {
+        next(e)
+    }
+}))
 
 app.listen(process.env.PORT || 3000)

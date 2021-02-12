@@ -37,7 +37,7 @@ const chartCallback = (ChartJS) => {
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, chartCallback });
 
 module.exports = {
-    testt: async (serverId) => {
+    create: async (serverId) => {
         let resp = await backend.getRecords(serverId);
         const configuration = {
             type: 'bar',

@@ -15,9 +15,9 @@ const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 module.exports = { 
     bot,
-    botGuild: (serverId) => { // provisirio
+    botGuild: (serverId) => {
         return bot.guilds.cache.get(serverId)
-    }
+    },
 }
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -91,3 +91,4 @@ bot.on('message', async msg => {
 })
 
 bot.login(token)
+
