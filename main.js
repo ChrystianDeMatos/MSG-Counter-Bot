@@ -10,7 +10,6 @@ const utils = require('./utils.js');
 // var CronJobManager = require('cron-job-manager'),
 // manager = new CronJobManager();
 
-
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 module.exports = { 
