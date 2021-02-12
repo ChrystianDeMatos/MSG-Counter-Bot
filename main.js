@@ -5,7 +5,6 @@ require('dotenv').config()
 const con = require('./backend.js');
 const utils = require('./utils.js');
 //require('./api.js')
-//const { timeStamp } = require('console');
 
 // var CronJobManager = require('cron-job-manager'),
 // manager = new CronJobManager();

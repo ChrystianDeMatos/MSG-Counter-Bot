@@ -4,7 +4,16 @@ var cors = require('cors')
 const backend = require('./backend.js');
 const imagesCreator = require('./imagesCreator.js')
 
-const { botGuild } = require('./main.js')
+const Discord = require("discord.js")
+const bot = new Discord.Client();
+const token = process.env.token
+bot.login(token)
+
+// function botGuild(id){
+//     return bot.guilds.cache.get(id);
+// }
+
+//const { botGuild } = require('./main.js')
 
 app.use(cors())
 
@@ -37,10 +46,10 @@ app.get('/api/serversList/', (async (req, res, next) => {
     try {
         let resp = await backend.getServers();
         resp.map((server, index) => { 
-            resp[index].name = botGuild(server.server_id).name
-            resp[index].img_url = botGuild(server.server_id).iconURL() 
+            let guild = bot.guilds.cache.get(server.server_id)
+            resp[index].name = guild.name
+            resp[index].img_url = guild.iconURL() 
         })
-
         res.send(resp);
     } catch (e) {
         next(e)
