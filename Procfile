@@ -1,2 +1,2 @@
-web: node api
+web:
 Worker: node main.js
