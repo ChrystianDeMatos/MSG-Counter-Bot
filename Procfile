@@ -1,2 +1,2 @@
-web: node api.js
+web: npm start
 Worker: node main.js

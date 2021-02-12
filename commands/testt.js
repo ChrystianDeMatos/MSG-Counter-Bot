@@ -11,9 +11,9 @@ module.exports = {
     description: 'Comando de teste.',
     additionalHelp: '\nMe executa :D',
     async execute(msg) {
-        const testeeeee = await imagesCreator.testt(msg.guild.id);
+        const base64Image = await imagesCreator.create(msg.guild.id);
         //console.log(testeeeee)
-        const sfbuff = new Buffer.from(testeeeee.split(",")[1], "base64");
+        const sfbuff = new Buffer.from(base64Image.split(",")[1], "base64");
         const sfattach = new Discord.MessageAttachment(sfbuff, "output.png");
         msg.channel.send(sfattach)
         //msg.reply('não faço nada :stuck_out_tongue_closed_eyes:')
