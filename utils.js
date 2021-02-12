@@ -102,15 +102,22 @@ async function sendEmbedServerRecords(channel, guild) {
 module.exports.setupSchedules = setupSchedules;
 async function setupSchedules() {
     const servers = await con.getServers()
-    for (const server of servers) {
+    servers.map((server) => {
         if (server.scheduled_region != null) {
             scheduleServer(server.server_id, server.scheduled_region)
-
-            //const cronJob = new cron.CronJob(midNightTime, function() {testRegisterServersDayRecords(server.server_id)}, null, true, server.scheduled_region);
-            //cronJob.start();
-            //await new Promise(resolve => setTimeout(resolve, 5000));
         }
-    }
+    })
+    // for (let server of servers) {
+        // if (server.scheduled_region != null) {
+        //     scheduleServer(server.server_id, server.scheduled_region)
+        // }
+        
+
+    //         //const cronJob = new cron.CronJob(midNightTime, function() {testRegisterServersDayRecords(server.server_id)}, null, true, server.scheduled_region);
+    //         //cronJob.start();
+    //         //await new Promise(resolve => setTimeout(resolve, 5000));
+    //     }
+    // }
 }
 
 module.exports.registerServersDayRecords = registerServersDayRecords;
