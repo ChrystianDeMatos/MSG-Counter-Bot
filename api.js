@@ -36,10 +36,10 @@ app.get('/api/servers/img/:serverId', (async (req, res, next) => {
 app.get('/api/serversList/', (async (req, res, next) => {
     try {
         let resp = await backend.getServers();
-        resp.map((server, index) => { resp[index].img_url = botGuild(server.server_id).iconURL() })
-        //bot.botGuild(resp.)
-
-        console.log(resp)
+        resp.map((server, index) => { 
+            resp[index].name = botGuild(server.server_id).name
+            resp[index].img_url = botGuild(server.server_id).iconURL() 
+        })
 
         res.send(resp);
     } catch (e) {
